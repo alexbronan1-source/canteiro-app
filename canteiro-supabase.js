@@ -75,6 +75,29 @@
     return organizacao;
   }
 
+  async function carregarDadosOnline() {
+    await iniciar();
+
+    if (!organizacao) {
+      await carregarOrganizacao();
+    }
+
+    const { data, error } = await client
+      .from('dados_app')
+      .select('dados')
+      .eq('organizacao_id', organizacao.id)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (data && data.dados && window.CanteiroBridge) {
+      window.CanteiroBridge.carregarDados(data.dados);
+      window.CanteiroBridge.atualizarStatus('Dados carregados da nuvem', false);
+    }
+
+    return data ? data.dados : null;
+  }
+
   function criarTela() {
     if (document.getElementById('canteiro-login')) return;
 
