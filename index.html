@@ -2267,6 +2267,23 @@ render();
   await initStore();
 })();
 
+/* Ponte entre o Canteiro e o armazenamento online */
+window.CanteiroBridge = {
+  obterDados: function () {
+    return snapshot();
+  },
+  carregarDados: function (dados) {
+    if (!dados || !dados.settings) {
+      throw new Error('Os dados recebidos não são válidos.');
+    }
+    state = normalize(dados);
+    render();
+  },
+  atualizarStatus: function (texto, erro) {
+    setStatus(texto, !!erro);
+  }
+};
+
 function updateMaterialCalc(){}
 </script>
 <script src="/vendor/qrcode.js"></script>
