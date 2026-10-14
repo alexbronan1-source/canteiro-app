@@ -77,7 +77,9 @@
 
   async function carregarDadosOnline() {
     await iniciar();
-
+    if (window.CanteiroReady) {
+      await window.CanteiroReady;
+    }
     if (!organizacao) {
       await carregarOrganizacao();
     }
