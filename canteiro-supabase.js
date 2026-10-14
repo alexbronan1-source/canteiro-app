@@ -225,7 +225,8 @@ info.style.borderRadius = '6px';
     if (!sessao) throw new Error('Faça login para continuar.');
 
     const org = await carregarOrganizacao();
-    const tela = document.getElementById('canteiro-login');
+await carregarDadosOnline();
+const tela = document.getElementById('canteiro-login');
     if (tela) tela.remove();
 
     mostrarConta(sessao, org);
