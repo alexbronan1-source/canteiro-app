@@ -195,7 +195,15 @@
     barra.replaceChildren();
 
     const info = document.createElement('span');
-    info.textContent = org.nome + ' · ' + org.funcao;
+    info.textContent =
+  org.nome + ' · ' + org.funcao.toUpperCase();
+
+info.style.fontSize = '14px';
+info.style.fontWeight = '700';
+info.style.color = '#202124';
+info.style.background = '#fff3bf';
+info.style.padding = '8px 10px';
+info.style.borderRadius = '6px';
     barra.appendChild(info);
 
     const botao = document.createElement('button');
