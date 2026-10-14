@@ -75,30 +75,77 @@
     return organizacao;
   }
 
-  async function carregarDadosOnline() {
-    await iniciar();
-    if (window.CanteiroReady) {
-      await window.CanteiroReady;
-    }
-    if (!organizacao) {
-      await carregarOrganizacao();
-    }
+  
+async function carregarDadosOnline() {
+  await iniciar();
 
-    const { data, error } = await client
-      .from('dados_app')
-      .select('dados')
-      .eq('organizacao_id', organizacao.id)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    if (data && data.dados && window.CanteiroBridge) {
-      window.CanteiroBridge.carregarDados(data.dados);
-      window.CanteiroBridge.atualizarStatus('Dados carregados da nuvem', false);
-    }
-
-    return data ? data.dados : null;
+  if (window.CanteiroReady) {
+    await window.CanteiroReady;
   }
+
+  if (!organizacao) {
+    await carregarOrganizacao();
+  }
+
+  const { data, error } = await client
+    .from('dados_app')
+    .select('dados')
+    .eq('organizacao_id', organizacao.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Canteiro: erro ao ler dados da nuvem:', error);
+    if (window.CanteiroBridge) {
+      window.CanteiroBridge.atualizarStatus(
+        'Erro ao ler nuvem: ' + error.message,
+        true
+      );
+    }
+    return null;
+  }
+
+  if (!data) {
+    if (window.CanteiroBridge) {
+      window.CanteiroBridge.atualizarStatus(
+        'Nuvem: nenhuma linha encontrada para esta empresa',
+        true
+      );
+    }
+    return null;
+  }
+
+  if (!data.dados) {
+    if (window.CanteiroBridge) {
+      window.CanteiroBridge.atualizarStatus(
+        'Nuvem: a linha existe, mas não contém dados',
+        true
+      );
+    }
+    return null;
+  }
+
+  if (!window.CanteiroBridge) {
+    console.error('Canteiro: ponte de dados não encontrada.');
+    return null;
+  }
+
+  try {
+    window.CanteiroBridge.carregarDados(data.dados);
+    window.CanteiroBridge.atualizarStatus(
+      'Dados carregados da nuvem',
+      false
+    );
+    return data.dados;
+  } catch (erro) {
+    console.error('Canteiro: falha ao aplicar dados da nuvem:', erro);
+    window.CanteiroBridge.atualizarStatus(
+      'Erro ao aplicar dados da nuvem',
+      true
+    );
+    return null;
+  }
+}
+
 
   function criarTela() {
     if (document.getElementById('canteiro-login')) return;
