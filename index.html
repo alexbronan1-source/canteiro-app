@@ -2262,9 +2262,18 @@ document.getElementById('themeToggle')?.addEventListener('click',()=>applyTheme(
 /* ------------------------------------------------------------------ início */
 defaultState();
 render();
-(async()=>{
-  try{dlApi=(window.claude&&claude.use)?await claude.use('downloads'):anchorDl}catch(e){dlApi=window.claude?null:anchorDl}
+
+window.CanteiroReady = (async () => {
+  try {
+    dlApi = (window.claude && claude.use)
+      ? await claude.use('downloads')
+      : anchorDl;
+  } catch (e) {
+    dlApi = window.claude ? null : anchorDl;
+  }
+
   await initStore();
+  return true;
 })();
 
 /* Ponte entre o Canteiro e o armazenamento online */
