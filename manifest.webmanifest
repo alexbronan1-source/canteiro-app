@@ -1,0 +1,19 @@
+{
+  "name": "Canteiro",
+  "short_name": "Canteiro",
+  "description": "Gestão de obras, orçamentos e controle financeiro.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFC21A",
+  "theme_color": "#FFC21A",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
