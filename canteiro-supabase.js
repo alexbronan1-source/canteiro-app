@@ -336,6 +336,7 @@ const tela = document.getElementById('canteiro-login');
     entrar,
     sair,
     carregarOrganizacao,
+    salvarDadosOnline,
     getOrganizacao: function () { return organizacao; }
   };
 
