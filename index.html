@@ -644,17 +644,50 @@ const clientOf=b=>{const c=state.clients.find(x=>x.id===b.clientId);return c||{n
 const store={ref:null};let timer=null,busy=false,dirty=false;
 function setStatus(t,err){const el=$('#status');if(el){el.textContent=t;el.className='status'+(err?' err':'')}}
 function save(){if(!loaded)return;dirty=true;clearTimeout(timer);timer=setTimeout(flush,700);setStatus('Salvando…')}
+
 async function flush(){
   if(busy){timer=setTimeout(flush,300);return}
-  busy=true;dirty=false;
+  busy=true;
+  dirty=false;
+
   try{
-    const snap=snapshot();const txt=JSON.stringify(snap);
-    if(txt.length>245000){setStatus('Dados no limite. Apague orçamentos antigos.',true)}
-    else if(store.ref){await store.ref.set(snap);setStatus('Salvo na sua conta')}
-    else{try{localStorage.setItem(KEY,txt);setStatus('Salvo só neste navegador')}catch(e){setStatus('Não foi possível salvar',true)}}
-  }catch(e){setStatus('Erro ao salvar. Tente de novo.',true)}
-  busy=false;if(dirty)flush();
+    const snap=snapshot();
+    const txt=JSON.stringify(snap);
+
+    if(txt.length>245000){
+      setStatus('Dados no limite. Apague orçamentos antigos.',true);
+    }else{
+      // Mantém uma cópia local de segurança.
+      try{
+        localStorage.setItem(KEY,txt);
+      }catch(e){
+        console.error('Canteiro: não foi possível criar cópia local:',e);
+      }
+
+      const supabaseApp=window.CanteiroSupabase;
+      const org=supabaseApp && supabaseApp.getOrganizacao
+        ? supabaseApp.getOrganizacao()
+        : null;
+
+      if(supabaseApp && org && supabaseApp.salvarDadosOnline){
+        await supabaseApp.salvarDadosOnline(snap);
+        setStatus('Salvo na nuvem');
+      }else if(store.ref){
+        await store.ref.set(snap);
+        setStatus('Salvo na sua conta');
+      }else{
+        setStatus('Cópia local salva; nuvem não conectada',true);
+      }
+    }
+  }catch(e){
+    console.error('Canteiro: erro ao salvar:',e);
+    setStatus('Erro ao salvar na nuvem. Cópia local mantida.',true);
+  }
+
+  busy=false;
+  if(dirty)flush();
 }
+
 async function initStore(){
   let found=null;
   try{
