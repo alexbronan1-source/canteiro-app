@@ -146,6 +146,38 @@ async function carregarDadosOnline() {
   }
 }
 
+async function salvarDadosOnline(dados) {
+  await iniciar();
+
+  const sessao = await obterSessao();
+  if (!sessao) {
+    throw new Error('Faça login para salvar os dados.');
+  }
+
+  if (!organizacao) {
+    await carregarOrganizacao();
+  }
+
+  const { error } = await client
+    .from('dados_app')
+    .upsert(
+      {
+        organizacao_id: organizacao.id,
+        dados: dados,
+        atualizado_por: sessao.user.id,
+        atualizado_em: new Date().toISOString()
+      },
+      { onConflict: 'organizacao_id' }
+    );
+
+  if (error) {
+    console.error('Canteiro: erro ao salvar na nuvem:', error);
+    throw new Error('Erro ao salvar na nuvem: ' + error.message);
+  }
+
+  return true;
+}
+
 
   function criarTela() {
     if (document.getElementById('canteiro-login')) return;
